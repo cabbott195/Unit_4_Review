@@ -58,18 +58,112 @@
 
          
 /* ================================================================= */
-var allCells
-
-function startUp(){
+//Number 3 Global Variable
+var allCells;
+//Number 4 This runs the startUp function when the page is loaded
+window.onload = startUp;
+//Number 5 Sets up the initial event handlers after the page is loaded
+function startUp() {
     document.getElementById("puzzleTitle").innerHTML = "Puzzle 1";
-    
-    document.getElementById("puzzle").innerHTML = drawHitori(puzzle1Number, hitori1Blocks, hitori1Rating);
-
+    document.getElementById("puzzle").innerHTML = drawHitori(hitori1Numbers, hitori1Blocks, hitori1Rating);
     var puzzleButtons = document.getElementsByClassName("puzzles");
-    for(var i = 0; i <puzzleButtons.length; i++){
+    for (var i = 0; i < puzzleButtons.length; i++) {
         puzzleButtons[i].onclick = switchPuzzle;
     }
     setupPuzzle();
+    //Checks for the solution by showing the numbers in red when the "Check Solution button is pressed"
+    document.getElementById("check").addEventListener("click", findErrors);
+    //Show the solution when the "Show Solution" button is pressed
+    document.getElementById("solve").addEventListener("click", showSolution);
+}
+//Number 6 Switches between three puzzles when the button is clicked
+function switchPuzzle(e) {
+    if (confirm("Do you want to switch puzzles your work will be lost?")) {
+        var puzzleID = e.target.id;
+        document.getElementById("puzzleTitle").innerHTML = e.target.value;
+        switch (puzzleID) {
+            //switches to puzzle one when the "Puzzle 1" button is pressed
+            case "puzzle1":
+            document.getElementById("puzzle").innerHTML = drawHitori(hitori1Numbers, hitori1Blocks, hitori1Rating);
+            break;
+            //switches to puzzle two when the "Puzzle 2" button is pressed
+            case "puzzle2":
+            document.getElementById("puzzle").innerHTML = drawHitori(hitori2Numbers, hitori2Blocks, hitori2Rating);
+            break;
+            //switches to puzzle three when the "Puzzle 3" button is pressed
+            case "puzzle3":
+            document.getElementById("puzzle").innerHTML = drawHitori(hitori3Numbers, hitori3Blocks, hitori3Rating);
+            break;
+        }
+        setupPuzzle();
+   }
+}
+//Number 7 Sets up the features of the puzzle table
+function setupPuzzle() {
+    allCells = document.querySelectorAll("table#hitoriGrid td");
+    for (var i = 0; i < allCells.length; i++ ) {
+        allCells[i].style.backgroundColor = "white";
+        allCells[i].style.color = "black";
+        allCells[i].style.borderRadius = "0";
+        allCells[i].addEventListener("mousedown",
+            function(e) {
+            //Erases/Changes blocks back to white when the shift key is pressed
+            if(e.shiftKey) {
+                e.target.style.backgroundColor = "white";
+                e.target.style.color = "black";
+                e.target.style.borderRadius = "0";
+            }
+            //Changes the blocks to black when the alt key is pressed
+            else if (e.altKey) {
+                e.target.style.backgroundColor = "black";
+                e.target.style.color = "white";
+                e.target.style.borderRadius = "0";
+            }
+            else {
+                e.target.style.backgroundColor = "rgb(101,101,101)";
+                e.target.style.color = "white";
+                e.target.style.borderRadius = "50%";
+            }
+            e.preventDefault();
+            });
+        document.addEventListener("mouseover",
+            function(e) {
+               //Changes cursor to an eraser when the shift key is pressed
+                if(e.shiftKey) {
+                    e.target.style.cursor = "url(images/jpf_eraser.png), alias";
+                }
+                //Changes the cursor to a cell when the alt key is pressed
+                else if (e.altKey) {
+                    e.target.style.cursor = "url(images/jpf_block.png), cell";
+                }
+                //Keeps the cursor as a pointer when anything else happens
+                else {
+                    e.target.style.cursor = "url(images/jpf_circle.png), pointer";
+                }
+            });
+        document.addEventListener("mouseup", checkSolution);
+    }
+}
+//Number 8 This runs the function that highlights any incorrect cells in red
+function findErrors() {
+    for (var i = 0; i < allCells.length; i++) {
+        if ((allCells[i].className === "blocks" &&
+        allCells[i].style.backgroundColor === "rgb(101,101,100)")
+        ||
+            (allCells[i].className === "circles" &&
+                allCells[i].style.backgroundColor === "black")) {
+            allCells[i].style.color = "red";
+        }
+    }
+    setTimeout(
+        function() {
+            for (var i = 0; i < allCells.length; i++) {
+               if(allCells[i].style.color === "red"){
+                  allCells[i].style.color = "white";
+               }
+            }
+        }
+    ,1000);
 }
 
 function checkSolution() {
